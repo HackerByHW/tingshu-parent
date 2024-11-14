@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.atguigu.tingshu.album.mapper.BaseAttributeMapper">
+
+    <!--
+       如果查询数据单表，直接使用resultType，加上对应实体类就可以了
+
+       目前数据有关联关系的，不能直接使用resultType，没法完成封装，需要自定义返回结果 resultMap
+   -->
+    <resultMap id="baseAttributeMap" type="com.atguigu.tingshu.model.album.BaseAttribute"
+               autoMapping="true">
+        <id property="id" column="id"></id>
+<!--        #property类中属性名字  column标总字段名-->
+        <!--BaseAttribute  和 BaseAttributeValue一对多-->
+        <collection property="attributeValueList" ofType="com.atguigu.tingshu.model.album.BaseAttribute"
+                    autoMapping="true">
+            <!--attribute_value_id查询id别名，避免id名称冲突-->
+            <id property="id" column="attribute_value_id,"></id>
+        </collection>
+
+    </resultMap>
+
+    <!--//根据一级分类Id 查询分类属性数据-->
+    <select id="findAttributeByCategory1Id" resultMap="baseAttributeMap">
+        select
+            ba.id,
+            ba.attribute_name,
+            ba.category1_id,
+            bav.id attribute_value_id,
+            bav.value_name,
+            bav.attribute_id
+        from base_attribute ba
+                 inner join base_attribute_value  bav on ba.id=bav.attribute_id
+        where ba.category1_id=#{category1Id}
+        order by ba.id
+    </select>
+
+</mapper>
+
