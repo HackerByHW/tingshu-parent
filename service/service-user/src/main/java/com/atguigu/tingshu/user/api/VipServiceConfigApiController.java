@@ -26,6 +26,16 @@ public class VipServiceConfigApiController {
 	public Result<List<VipServiceConfig>> findAll(){
 		return Result.ok(vipServiceConfigService.list());
 	}
+	/**
+	 * 根据id获取VIP服务配置信息
+	 * @param id
+	 * @return
+	 */
+	@Operation(summary = "根据id获取VIP服务配置信息")
+	@GetMapping("getVipServiceConfig/{id}")
+	public Result<VipServiceConfig> getVipServiceConfig(Long id){
+		return Result.ok(vipServiceConfigService.getById(id));
+	}
 
 
 }

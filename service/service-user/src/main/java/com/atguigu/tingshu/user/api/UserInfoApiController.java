@@ -56,7 +56,9 @@ public class UserInfoApiController {
 	@Operation(summary = "判断用户是否购买过专辑")
 	@GetMapping("isPaidAlbum/{albumId}")
 	public Result<Boolean> isPaidAlbum (@PathVariable Long albumId){
+		// 获取到用户Id
 		Long userId = AuthContextHolder.getUserId();
+		// 调用服务层方法
 		Boolean flag = userInfoService.isPaidAlbum(albumId,userId);
 		return Result.ok(flag);
 	}
