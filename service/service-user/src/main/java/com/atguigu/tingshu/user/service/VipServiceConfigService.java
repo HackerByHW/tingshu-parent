@@ -5,4 +5,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface VipServiceConfigService extends IService<VipServiceConfig> {
 
+
 }

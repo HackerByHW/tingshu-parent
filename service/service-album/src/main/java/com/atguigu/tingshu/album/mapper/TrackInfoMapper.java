@@ -17,4 +17,6 @@ public interface TrackInfoMapper extends BaseMapper<TrackInfo> {
                                          @Param("vo") TrackInfoQuery trackInfoQuery);
 
     IPage<AlbumTrackListVo> findAlbumTrackPage(Page<AlbumTrackListVo> pageParam, Long albumId, Long userId);
+
+    void updatePalyNum(Long trackId);
 }

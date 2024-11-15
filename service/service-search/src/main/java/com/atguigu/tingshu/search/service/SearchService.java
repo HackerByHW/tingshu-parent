@@ -27,4 +27,5 @@ public interface SearchService {
 
     List<String> completeSuggest(String keyword);
 
+    void updateLatelyAlbumRanking();
 }

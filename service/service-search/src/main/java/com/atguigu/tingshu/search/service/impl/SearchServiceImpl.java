@@ -14,14 +14,12 @@ import co.elastic.clients.elasticsearch.core.search.Suggestion;
 import com.alibaba.fastjson.JSON;
 import com.atguigu.tingshu.album.client.AlbumInfoFeignClient;
 import com.atguigu.tingshu.album.client.CategoryFeignClient;
+import com.atguigu.tingshu.common.constant.RedisConstant;
 import com.atguigu.tingshu.common.execption.GuiguException;
 import com.atguigu.tingshu.common.result.Result;
 import com.atguigu.tingshu.common.result.ResultCodeEnum;
 import com.atguigu.tingshu.common.util.PinYinUtils;
-import com.atguigu.tingshu.model.album.AlbumAttributeValue;
-import com.atguigu.tingshu.model.album.AlbumInfo;
-import com.atguigu.tingshu.model.album.BaseCategory3;
-import com.atguigu.tingshu.model.album.BaseCategoryView;
+import com.atguigu.tingshu.model.album.*;
 import com.atguigu.tingshu.model.search.AlbumInfoIndex;
 import com.atguigu.tingshu.model.search.AttributeValueIndex;
 import com.atguigu.tingshu.model.search.SuggestIndex;
@@ -33,10 +31,12 @@ import com.atguigu.tingshu.user.client.UserInfoFeignClient;
 import com.atguigu.tingshu.vo.search.AlbumInfoIndexVo;
 import com.atguigu.tingshu.vo.search.AlbumSearchResponseVo;
 import com.atguigu.tingshu.vo.user.UserInfoVo;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.suggest.Completion;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -67,6 +67,9 @@ public class SearchServiceImpl implements SearchService {
 
     @Autowired
     private SuggestIndexRepository suggestIndexRepository;
+    @Autowired
+    private RedisTemplate redisTemplate;
+
 
     //专辑上架
     @Override
@@ -500,5 +503,59 @@ public class SearchServiceImpl implements SearchService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    //更新排行榜
+    @SneakyThrows
+    @Override
+    public void updateLatelyAlbumRanking() {
+        //1 远程调用：查询所有一级分类，得到list集合
+        Result<List<BaseCategory1>> category1Result = categoryFeignClient.getCategory1();
+        List<BaseCategory1> category1List = category1Result.getData();
+        //2 遍历所有一级分类集合，得到每个一级分类
+        for (BaseCategory1 baseCategory1 : category1List){
+            Long category1Id = baseCategory1.getId();
+            //创建数组，存储五个统计数据
+            String[] rankingDimensionArray = new String[]{"hotScore",
+                    "playStatNum", "subscribeStatNum", "buyStatNum", "commentStatNum"};
+            //遍历数组，得到每个统计指标
+            for (String ranging :  rankingDimensionArray) {
+                //3 拿着每个一级分类id + 统计指标（播放量、评论量）查询es
+                //得到排序之后的数据
+                SearchRequest.Builder searchRequest = new SearchRequest.Builder();
+                /*
+                GET /albuminfo/_search
+                            {
+                              "query": {
+                                "term": {
+                                  "category1Id": {
+                                    "value": "1"
+                                  }
+                                }
+                              }
+                              ,"sort": [
+                                {
+                                  "playStatNum": {
+                                    "order": "desc"
+                                  }
+                                }
+                              ],
+                              "size": 10
+                            }
+                 */
+                searchRequest.index("albuminfo").query(q->q.term(t->t.field("category1Id").value(category1Id)))
+                        .sort(s->s.field(d->d.field(ranging).order(SortOrder.Desc))).size(10);
+                SearchResponse<AlbumInfoIndex> response = elasticsearchClient.search(searchRequest.build(), AlbumInfoIndex.class);
+                List<AlbumInfoIndex> albumInfoIndexList = response.hits().hits().stream().map(Hit::source).collect(Collectors.toList());
+                //4 把每个一级分类里面根据不同指标排序之后数据放到redis里面
+                //使用redis里面hash类型存储数据
+                //redis的key是一级分类id
+                //redis的field是不同指标（播放量、评论量）
+                //redis的value对应的数据
+                String rangKey = RedisConstant.RANKING_KEY_PREFIX+baseCategory1.getId();
+                redisTemplate.opsForHash().put(rangKey,ranging,albumInfoIndexList);
+            }
+        }
+
     }
 }

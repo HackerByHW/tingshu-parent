@@ -6,6 +6,7 @@ import com.atguigu.tingshu.search.service.SearchService;
 import com.atguigu.tingshu.vo.search.AlbumSearchResponseVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -100,6 +101,19 @@ public class SearchApiController {
         List<String> list = searchService.completeSuggest(keyword);
         //  返回数据
         return Result.ok(list);
+    }
+    /**
+     * 更新排行榜
+     * @return
+     */
+    @SneakyThrows
+    @Operation(summary = "更新排行榜")
+    @GetMapping("updateLatelyAlbumRanking")
+    public Result updateLatelyAlbumRanking() {
+        //  调用服务层方法
+        searchService.updateLatelyAlbumRanking();
+        //  返回数据
+        return Result.ok();
     }
 }
 
