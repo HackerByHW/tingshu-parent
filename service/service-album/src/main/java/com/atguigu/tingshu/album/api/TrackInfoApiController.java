@@ -36,6 +36,9 @@ public class TrackInfoApiController {
 	@Autowired
 	private VodService vodService;
 
+	@Autowired
+	private RedisTemplate redisTemplate;
+
 	/**
 	 * 保存修改声音数据
 	 * @param id
@@ -76,8 +79,7 @@ public class TrackInfoApiController {
 		return Result.ok();
 	}
 
-	@Autowired
-	private RedisTemplate redisTemplate;
+
 
 	@HwLogin(required = true)
 	@Operation(summary = "获取当前用户声音分页列表")
