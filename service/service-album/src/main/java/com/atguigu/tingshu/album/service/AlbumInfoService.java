@@ -34,4 +34,6 @@ public interface AlbumInfoService extends IService<AlbumInfo> {
     Map<String, Object> getAlbumStat(Long albumId);
 
     AlbumStatVo getAlbumStatVoByAlbumId(Long albumId);
+
+
 }
