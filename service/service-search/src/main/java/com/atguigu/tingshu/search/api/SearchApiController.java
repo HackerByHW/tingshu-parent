@@ -3,8 +3,12 @@ package com.atguigu.tingshu.search.api;
 import com.atguigu.tingshu.common.result.Result;
 import com.atguigu.tingshu.query.search.AlbumIndexQuery;
 import com.atguigu.tingshu.search.service.SearchService;
+import com.atguigu.tingshu.vo.search.AlbumInfoIndexVo;
 import com.atguigu.tingshu.vo.search.AlbumSearchResponseVo;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,23 +27,26 @@ public class SearchApiController {
     private SearchService searchService;
 
     //专辑上架
-/**
- * 上架专辑
- * @param albumId
- * @return
- */
 
-@Operation(summary = "专辑上架")
-@GetMapping("/upperAlbum/{albumId}")
-    public Result upperAlbum(@PathVariable Long albumId){
-    //  调用服务层方法.
-    this.searchService.upperAlbum(albumId);
-    //  默认返回
-    return Result.ok();
-}
+    /**
+     * 上架专辑
+     *
+     * @param albumId
+     * @return
+     */
+
+    @Operation(summary = "专辑上架")
+    @GetMapping("/upperAlbum/{albumId}")
+    public Result upperAlbum(@PathVariable Long albumId) {
+        //  调用服务层方法.
+        this.searchService.upperAlbum(albumId);
+        //  默认返回
+        return Result.ok();
+    }
 
     /**
      * 下架专辑
+     *
      * @param albumId
      * @return
      */
@@ -52,11 +59,12 @@ public class SearchApiController {
 
     /**
      * 批量上架
+     *
      * @return
      */
     @Operation(summary = "批量上架")
     @GetMapping("batchUpperAlbum")
-    public Result batchUpperAlbum(){
+    public Result batchUpperAlbum() {
         //  循环
         for (long i = 1; i <= 1500; i++) {
             searchService.upperAlbum(i);
@@ -67,19 +75,21 @@ public class SearchApiController {
 
     /**
      * 根据关键词检索
+     *
      * @param albumIndexQuery
      * @return
      * @throws IOException
      */
     @Operation(summary = "专辑搜索列表")
     @PostMapping
-    public Result search(@RequestBody AlbumIndexQuery albumIndexQuery){
+    public Result search(@RequestBody AlbumIndexQuery albumIndexQuery) {
         AlbumSearchResponseVo albumSearchResponseVo = searchService.search(albumIndexQuery);
         return Result.ok(albumSearchResponseVo);
     }
 
     /**
      * 根据一级分类Id获取数据
+     *
      * @param category1Id
      * @return
      */
@@ -89,8 +99,10 @@ public class SearchApiController {
         List<Map<String, Object>> mapList = searchService.channel(category1Id);
         return Result.ok(mapList);
     }
+
     /**
      * 自动补全功能
+     *
      * @param keyword
      * @return
      */
@@ -102,8 +114,10 @@ public class SearchApiController {
         //  返回数据
         return Result.ok(list);
     }
+
     /**
      * 更新排行榜
+     *
      * @return
      */
     @SneakyThrows
@@ -115,5 +129,24 @@ public class SearchApiController {
         //  返回数据
         return Result.ok();
     }
+
+    /**
+ * 获取排行榜列表
+ * @param category1Id
+ * @param dimension
+ * @return
+ */
+@Operation(summary = "获取排行榜列表")
+@Parameters({
+        @Parameter(name = "category1Id",description = "一级分类",in = ParameterIn.PATH,required = true),
+        @Parameter(name = "dimension",description = "热度:hotScore、播放量:playStatNum、订阅量:subscribeStatNum、购买量:buyStatNum、评论数:albumCommentStatNum",required = true,in = ParameterIn.PATH),
+})
+@GetMapping("findRankingList/{category1Id}/{dimension}")
+public Result<List<AlbumInfoIndexVo>> findRankingList(@PathVariable Long category1Id, @PathVariable String dimension) {
+    //  调用服务层方法
+    List<AlbumInfoIndexVo> infoIndexVoList = searchService.findRankingList(category1Id, dimension);
+    //  返回结果集
+    return Result.ok(infoIndexVoList);
+}
 }
 

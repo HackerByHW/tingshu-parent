@@ -21,8 +21,7 @@ public class UserListenProcessApiController {
 
 	@Autowired
 	private UserListenProcessService userListenProcessService;
-	@Autowired
-	private UserListenProcessVo userListenProcessVo;
+
 
 
 	/**
@@ -35,6 +34,7 @@ public class UserListenProcessApiController {
 	@GetMapping("/getTrackBreakSecond/{trackId}")
 	public Result<BigDecimal> getTrackBreakSecond(@PathVariable Long trackId){
 		Long userId = AuthContextHolder.getUserId();
+		//调用service，根据userId + trackId
 		BigDecimal breakSecond = userListenProcessService.getTrackBreakSecond(userId,trackId);
 		return Result.ok(breakSecond);
 	}

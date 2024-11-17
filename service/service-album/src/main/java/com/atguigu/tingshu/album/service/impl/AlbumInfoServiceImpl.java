@@ -146,18 +146,26 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
 		rabbitService.sendMessage(MqConst.EXCHANGE_ALBUM, MqConst.ROUTING_ALBUM_LOWER, id);
 	}
 
+		//////////////////////////////////
+
+//	private AlbumInfo getAlbumInfoData(Long id) {
+//		//根据专辑id查询
+//		AlbumInfo albumInfo = albumInfoMapper.selectById(id);
+//		//获取专辑属性信息
+//		LambdaQueryWrapper<AlbumAttributeValue> wrapper = new LambdaQueryWrapper<>();
+//		wrapper.eq(AlbumAttributeValue::getAlbumId,id);
+//		List<AlbumAttributeValue> attributeValueList = albumAttributeValueMapper.selectList(wrapper);
+//		albumInfo.setAlbumAttributeValueVoList(attributeValueList);
+//		return albumInfo;
+//	}
+
 	//修改- 根据专辑id查询专辑信息
 	@Override
 	public AlbumInfo getAlbumInfoById(Long id) {
-		//根据专辑id查询
-		AlbumInfo albumInfo = albumInfoMapper.selectById(id);
-		//获取专辑属性信息
-		LambdaQueryWrapper<AlbumAttributeValue> wrapper = new LambdaQueryWrapper<>();
-		wrapper.eq(AlbumAttributeValue::getAlbumId, id);
-		List<AlbumAttributeValue> attributeValueList = albumAttributeValueMapper.selectList(wrapper);
-		albumInfo.setAlbumAttributeValueVoList(attributeValueList);
-		return albumInfo;
+
+		return null;
 	}
+
 
 	@Autowired
 	private AlbumAttributeValueService albumAttributeValueService;

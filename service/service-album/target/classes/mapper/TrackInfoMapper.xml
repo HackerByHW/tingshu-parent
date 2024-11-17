@@ -51,6 +51,11 @@
         order by info.orderNum asc
     </select>
 
+    <update id="updatePalyNum">
+        update track_stat
+        set stat_num = stat_num + 1
+        where track_id = #{trackId} and stat_type = '0701'
+    </update>
 
 
 

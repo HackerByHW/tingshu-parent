@@ -558,4 +558,12 @@ public class SearchServiceImpl implements SearchService {
         }
 
     }
+
+    @Override
+    public List<AlbumInfoIndexVo> findRankingList(Long category1Id, String dimension) {
+
+        String rangKey = RedisConstant.RANKING_KEY_PREFIX+category1Id;
+         List<AlbumInfoIndexVo> list = (List<AlbumInfoIndexVo>)redisTemplate.opsForHash().get(rangKey, dimension);
+        return list;
+    }
 }
